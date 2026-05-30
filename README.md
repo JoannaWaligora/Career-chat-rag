@@ -62,18 +62,18 @@ Design principles:
 
 ```text
 app.py                      # chatbot application
-retriever.py               # retrieval pipeline
-ingest.py                  # vector database creation
+retriever.py                # retrieval pipeline
+ingest.py                   # vector database creation
 
-career_chat_1.ipynb        # baseline RAG implementation
-career_chat_2.ipynb        # optimization and evaluation
+career_chat_1.ipynb         # baseline RAG implementation
+career_chat_2.ipynb         # optimization and evaluation
 
-creator_test_data.ipynb    # synthetic evaluation dataset
-prepare_github_data.ipynb  # repository ingestion
+creator_test_data.ipynb     # synthetic evaluation dataset
+prepare_github_data.ipynb   # repository ingestion
 
-linkedin.pdf               # professional profile information
-project_summaries.json     # generated project summaries
-tests.jsonl                # RAG evaluation test set (queries + expected answers)
+linkedin.pdf                # professional profile information
+project_summaries.json      # generated project summaries
+tests.jsonl                 # RAG evaluation test set (queries + expected answers)
 ```
 
 The project includes both a baseline implementation (`career_chat_1`) and an optimized version (`career_chat_2`) used for retrieval experiments and evaluation.
