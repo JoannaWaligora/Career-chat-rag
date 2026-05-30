@@ -1,0 +1,10 @@
+python-dotenv
+openai
+chromadb
+pydantic
+litellm
+requests
+pypdf
+gradio
+langchain-core
+langchain-text-splitters
