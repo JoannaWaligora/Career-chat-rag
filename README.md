@@ -73,6 +73,7 @@ prepare_github_data.ipynb   # repository ingestion
 
 linkedin.pdf                # professional profile information
 project_summaries.json      # generated project summaries
+tests.jsonl      	    # RAG evaluation test set (queries + expected answers)
 ```
 
 The project includes both a baseline implementation (`career_chat_1`) and an optimized version (`career_chat_2`) used for retrieval experiments and evaluation.
