@@ -71,9 +71,8 @@ Return JSON:
     try:
         order = json.loads(reply)["order"]
     except:
-        return chunks  # fallback
+        return chunks  
 
-    # 🔒 zabezpieczenie
     seen = set()
     ranked = []
 
@@ -82,7 +81,6 @@ Return JSON:
             ranked.append(chunks[i - 1])
             seen.add(i)
 
-    # 🔥 fallback – uzupełnij brakujące
     for idx in range(len(chunks)):
         if (idx + 1) not in seen:
             ranked.append(chunks[idx])
@@ -104,7 +102,7 @@ MODELS: {", ".join(p.get("models_used", []))}
 
 def make_rag_messages(question, history, chunks):
 
-    project_summaries = format_project_summaries(project_summaries_cache)  # TWOJA FUNKCJA
+    project_summaries = format_project_summaries(project_summaries_cache)
 
     context = "\n\n".join(
         f"[PROJECT: {c.metadata.get('project','UNKNOWN')}]\n"

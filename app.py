@@ -215,7 +215,6 @@ Be concise and factual.
 
             msg = response.choices[0].message
 
-            # TOOL CALLING
             if msg.tool_calls:
 
                 messages.append(msg)
