@@ -8,7 +8,6 @@ import json
 
 MODEL = "gpt-4.1-mini"
 openai = OpenAI()
-DB_NAME = "/tmp/vector_db_2"
 collection_name = "docs"
 embedding_model = "text-embedding-3-small"
 load_dotenv(override=True)

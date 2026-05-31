@@ -9,7 +9,6 @@ from retriever import answer_question
 
 load_dotenv(override=True)
 MODEL = "gpt-4.1-mini"
-DB_NAME = "/tmp/vector_db_2"
 
 def ensure_vector_db(force=False):
     print("Building a vector database in RAM (In-Memory)...", flush=True)
