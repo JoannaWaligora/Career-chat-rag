@@ -1,5 +1,4 @@
 from dotenv import load_dotenv
-from chromadb import PersistentClient
 from openai import OpenAI
 import json
 import os
@@ -10,22 +9,13 @@ from retriever import answer_question
 
 load_dotenv(override=True)
 MODEL = "gpt-4.1-mini"
-DB_NAME = "vector_db_2"
-chroma = PersistentClient(path=DB_NAME)
+DB_NAME = "/tmp/vector_db_2"
 
-def ensure_vector_db():
-    chroma = PersistentClient(path=DB_NAME)
-
-    try:
-        col = chroma.get_collection("docs")
-        if col.count() > 0:
-            return
-    except:
-        pass
-
-    print("Building DB...")
+def ensure_vector_db(force=False):
+    print("Building a vector database in RAM (In-Memory)...", flush=True)
     from ingest import main
     main(build_summaries=False)
+    print("Base building complete!", flush=True)
 
 def push(text):
     requests.post(
@@ -240,6 +230,9 @@ Be concise and factual.
         return "Tool loop limit reached."
 
 if __name__ == "__main__":
+    print("Initializing vector basis check...", flush=True)
+    ensure_vector_db()
+
     me = Me()
 
     demo = gr.ChatInterface(
@@ -266,7 +259,8 @@ over Joanna Waligóra's GitHub portfolio and career profile.
             "Which projects use CNN models?",
             "Tell me about the LIDAR classification project",
             "What is Joanna's background?"
-        ]
+        ],
+        cache_examples=False
     )
 
     demo.launch()

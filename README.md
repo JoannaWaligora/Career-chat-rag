@@ -28,16 +28,16 @@ The chatbot retrieves information from portfolio projects and generates grounded
 
 ## Architecture
 
-Question
-↓
-Retriever (Top 20)
-↓
-Reranker
-↓
-Top 8 Context
-↓
-LLM
-↓
+Question 
+   ↓ 
+Retriever (Top 20) 
+   ↓ 
+Reranker 
+   ↓ 
+Top 8 Context 
+   ↓ 
+LLM 
+   ↓ 
 Answer
 
 ---
@@ -80,19 +80,6 @@ The project includes both a baseline implementation (`career_chat_1`) and an opt
 
 ---
 
-## Final Results
-
-| Metric | Final |
-|---|---:|
-| MRR | 0.7285 |
-| nDCG | 0.7264 |
-| Coverage | 80.52% |
-| Accuracy | 4.68 |
-| Completeness | 4.46 |
-| Relevance | 4.95 |
-
----
-
 ## Optimization Summary
 
 ✅ Context enrichment (chunk summaries + project summaries)
@@ -108,6 +95,31 @@ The project includes both a baseline implementation (`career_chat_1`) and an opt
 The largest improvements came from enriching repository content with structured summaries and applying LLM-based reranking.
 
 ---
+## Evaluation Methodology & Synthetic Dataset
+
+To rigorously evaluate the RAG pipeline, a synthetic evaluation dataset was generated using the pipeline implemented in `creator_test_data.ipynb` (leveraging `gpt-4.1-mini`). 
+
+The evaluation dataset (`tests.jsonl`) consists of non-trivial, grounded question-answer pairs divided into three distinct reasoning categories:
+1. **Atomic Facts & Local Reasoning:** Questions requiring precise information extraction from specific code chunks.
+2. **Project-Level Reasoning:** Comprehensive questions built by analyzing combined chunk summaries across an entire repository.
+3. **Cross-Project Evaluation:** Complex queries starting with *"Across projects..."* that require retrieving and comparing implementation strategies, metrics, or technologies between at least two different repositories.
+
+Trivial or overly generic questions (e.g., *"What is the purpose of this repository?"*) were automatically filtered out during the pipeline cleanup phase to ensure high-quality benchmarking.
+
+---
+
+## Final Results
+
+| Metric | Final |
+|---|---:|
+| MRR | 0.7285 |
+| nDCG | 0.7264 |
+| Coverage | 80.52% |
+| Accuracy | 4.68 |
+| Completeness | 4.46 |
+| Relevance | 4.95 |
+
+---
 
 ## Run Locally
 
@@ -115,7 +127,15 @@ The largest improvements came from enriching repository content with structured 
 pip install -r requirements.txt
 python app.py
 ```
+---
+## Deployment & Production Notes (Hugging Face Spaces)
 
+During local development, `PersistentClient` from ChromaDB is used to save the vector database to the local disk, preventing redundant OpenAI embedding API costs.
+
+For the production deployment on **Hugging Face Spaces**, due to the stateless container architecture and strict read-only file system permissions (`readonly database error`), the application has been adapted to run entirely in memory:
+- The system utilizes Chroma's `EphemeralClient()` (In-Memory mode).
+- The portfolio vector database is built dynamically in RAM upon container startup.
+- The runtime in-memory instance is shared seamlessly between the indexing process (`ingest.py`) and the retrieval pipeline (`retriever.py`).
 ---
 
 ## Notes

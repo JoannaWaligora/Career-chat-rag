@@ -1,6 +1,6 @@
 from openai import OpenAI
 from dotenv import load_dotenv
-from chromadb import PersistentClient
+from chromadb import EphemeralClient
 from litellm import completion
 from pydantic import BaseModel
 import json
@@ -11,7 +11,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 MODEL = "gpt-4.1-mini"
 openai = OpenAI()
-DB_NAME = "vector_db_2"
+DB_NAME = "/tmp/vector_db_2"
 collection_name = "docs"
 embedding_model = "text-embedding-3-small"
 load_dotenv(override=True)
@@ -34,7 +34,6 @@ def extract_project_name(path: str) -> str:
     if not path:
         return "UNKNOWN_PROJECT"
 
-    # normalizacja separatorów (działa dla Windows i Unix)
     path = path.replace("\\", "/")
 
     match = re.search(r"repos/([^/]+)/", path)
@@ -141,10 +140,8 @@ def process_chunk(chunk, retries=3):
 
             content = response.choices[0].message.content
 
-            # 🔥 bez regexów
             data = json.loads(content)
 
-            # 🔥 manualne złożenie obiektu (bez original_text z LLM)
             parsed = Chunk(
                 headline=data["headline"],
                 summary=data["summary"],
@@ -156,7 +153,6 @@ def process_chunk(chunk, retries=3):
         except Exception as e:
             print(f"Retry {i+1}: {e}")
 
-    # fallback
     return Result(
         page_content=f"""TITLE: FALLBACK
 
@@ -173,21 +169,24 @@ def process_all_chunks(chunks):
 
 
 def create_embeddings(chunks):
-    chroma = PersistentClient(path=DB_NAME)
-    if collection_name in [c.name for c in chroma.list_collections()]:
-        chroma.delete_collection(collection_name)
+    texts = [chunk.page_content for chunk in chunks]    
+    if not texts:
+        print("Brak tekstów do osadzenia!")
+        return
 
-    texts = [chunk.page_content for chunk in chunks]
-    emb = openai.embeddings.create(model=embedding_model, input=texts).data
-    vectors = [e.embedding for e in emb]
-
-    collection = chroma.get_or_create_collection(collection_name)
-
-    ids = [str(i) for i in range(len(chunks))]
-    metas = [chunk.metadata for chunk in chunks]
-
-    collection.add(ids=ids, embeddings=vectors, documents=texts, metadatas=metas)
-    print(f"Vectorstore created with {collection.count()} documents")
+    global chroma
+    chroma = EphemeralClient()    
+    
+    emb = openai.embeddings.create(model=embedding_model, input=texts).data    
+    vectors = [e.embedding for e in emb]    
+    
+    collection = chroma.get_or_create_collection(collection_name)    
+    ids = [str(i) for i in range(len(chunks))]    
+    metas = [chunk.metadata for chunk in chunks]    
+    collection.add(ids=ids, embeddings=vectors, documents=texts, metadatas=metas)    
+    print(f"Vectorstore created IN MEMORY with {collection.count()} documents")
+    
+    return chroma
 
 def group_by_project(results):
     grouped = {}
