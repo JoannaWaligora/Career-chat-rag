@@ -121,13 +121,25 @@ Trivial or overly generic questions (e.g., *"What is the purpose of this reposit
 
 ---
 
-## Run Locally
+## Repository Usage & Local Development
 
-```bash
-pip install -r requirements.txt
-python app.py
-```
+This repository is optimized to run as a cloud-native application on **Hugging Face Spaces** using an in-memory architecture to comply with stateless container security. 
+
+### Reviewing the Code & Experiments Locally
+To explore the implementation, experiments, and RAG evaluation pipeline on your machine:
+
+1. **Clone the repository and install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+2. **Explore the Notebooks:**
+   - Open `career_chat_1.ipynb` to review the baseline RAG exploration.
+   - Open `career_chat_2.ipynb` to see the optimization experiments and metrics calculation.
+   - Open `creator_test_data.ipynb` to analyze how the synthetic test dataset was generated.
+
+*Note: The production web app (`app.py`) is designed specifically for deployment on Hugging Face Spaces using `EphemeralClient`. For local end-to-end execution of the web interface, ChromaDB would require switching back to `PersistentClient` mode.*
+
 ---
+
 ## Deployment & Production Notes (Hugging Face Spaces)
 
 During local development, `PersistentClient` from ChromaDB is used to save the vector database to the local disk, preventing redundant OpenAI embedding API costs.
