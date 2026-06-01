@@ -3,11 +3,13 @@ from dotenv import load_dotenv
 from litellm import completion
 from pydantic import BaseModel
 import json
+import os
 
 
 
 MODEL = "gpt-4.1-mini"
 openai = OpenAI()
+DB_NAME = "vector_db_2"
 collection_name = "docs"
 embedding_model = "text-embedding-3-small"
 load_dotenv(override=True)
@@ -18,13 +20,15 @@ with open("project_summaries.json", "r", encoding="utf-8") as f:
     project_summaries_cache = json.load(f)
 
 def get_collection():
-    from ingest import chroma
+    collection_name = "docs"
     
-    try:
-        collection = chroma.get_collection("docs")
-    except Exception as e:
-        print(f"Error downloading collection from RAM: {e}")
-        collection = chroma.get_or_create_collection("docs")
+    if "SPACE_ID" in os.environ:
+        from ingest import chroma
+        collection = chroma.get_collection(collection_name)
+    else:
+        from chromadb import PersistentClient
+        chroma = PersistentClient(DB_NAME)
+        collection = chroma.get_collection(collection_name)
         
     return collection
 

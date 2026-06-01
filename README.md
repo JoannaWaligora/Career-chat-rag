@@ -123,35 +123,34 @@ Trivial or overly generic questions (e.g., *"What is the purpose of this reposit
 
 ## Repository Usage & Local Development
 
-This repository is optimized to run as a cloud-native application on **Hugging Face Spaces** using an in-memory architecture to comply with stateless container security. 
+This repository features an environment-aware hybrid architecture. It dynamically detects whether it is running in a local environment or deployed to the cloud, adjusting its database configuration automatically. 
 
 ### Reviewing the Code & Experiments Locally
 To explore the implementation, experiments, and RAG evaluation pipeline on your machine:
 
 1. **Clone the repository and install dependencies:**
    ```bash
-   pip install -r requirements.txt
-2. **Explore the Notebooks:**
+   pip install -r requirements.txt```
+2. **Run the chatbot interface locally:**
+   ```bash
+   python app.py```
+3. **Explore the Notebooks & Experiments:**
    - Open `career_chat_1.ipynb` to review the baseline RAG exploration.
    - Open `career_chat_2.ipynb` to see the optimization experiments and metrics calculation.
    - Open `creator_test_data.ipynb` to analyze how the synthetic test dataset was generated.
-
-*Note: The production web app (`app.py`) is designed specifically for deployment on Hugging Face Spaces using `EphemeralClient`. For local end-to-end execution of the web interface, ChromaDB would require switching back to `PersistentClient` mode.*
-
 ---
 
 ## Deployment & Production Notes (Hugging Face Spaces)
 
-During local development, `PersistentClient` from ChromaDB is used to save the vector database to the local disk, preventing redundant OpenAI embedding API costs.
+The application code is fully production-optimized for cloud deployment. It utilizes conditional execution blocks to handle different environment states natively:
 
-For the production deployment on **Hugging Face Spaces**, due to the stateless container architecture and strict read-only file system permissions (`readonly database error`), the application has been adapted to run entirely in memory:
-- The system utilizes Chroma's `EphemeralClient()` (In-Memory mode).
-- The portfolio vector database is built dynamically in RAM upon container startup.
-- The runtime in-memory instance is shared seamlessly between the indexing process (`ingest.py`) and the retrieval pipeline (`retriever.py`).
+- **Local Development:** The system utilizes Chroma's `PersistentClient` to save the vector database (`vector_db/`) to the local disk, preventing redundant OpenAI embedding API costs and allowing offline repository ingestion.
+- **Production (Hugging Face Spaces):** Due to strict stateless container architectures and read-only file system permissions (`readonly database error`), the application seamlessly switches to Chroma's `EphemeralClient()`. 
+- **In-Memory Shared Runtime:** Upon container startup, `app.py` triggers the indexing pipeline (`ingest.py`), dynamically building the vector store in RAM. Using strategic local imports, the retrieval process (`retriever.py`) instantly shares this in-memory collection without disk access dependencies.
+
 ---
 
 ## Notes
 
-Vector databases and cloned repositories are generated locally and are not included in the repository.
-
-The knowledge base can be updated by re-ingesting GitHub repositories and rebuilding embeddings after adding new projects.
+- **Git Tracking:** Cloned repositories (`repos/`) and persistent local vector databases (`vector_db/`) are excluded from version control via `.gitignore` to maintain a clean repository structure.
+- **Updating Knowledge Base:** To update the chatbot's knowledge base on Hugging Face, simply push new projects or modifications into the repository directory and trigger a **Factory Rebuild** in your Hugging Face Space settings. The container will automatically re-ingest all active repositories into memory on startup.

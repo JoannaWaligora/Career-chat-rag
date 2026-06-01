@@ -1,6 +1,5 @@
 from openai import OpenAI
 from dotenv import load_dotenv
-from chromadb import EphemeralClient
 from litellm import completion
 from pydantic import BaseModel
 import json
@@ -10,6 +9,7 @@ from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 MODEL = "gpt-4.1-mini"
+DB_NAME = "vector_db_2"
 openai = OpenAI()
 collection_name = "docs"
 embedding_model = "text-embedding-3-small"
@@ -170,19 +170,34 @@ def process_all_chunks(chunks):
 def create_embeddings(chunks):
     texts = [chunk.page_content for chunk in chunks]    
     if not texts:
-        print("Brak tekstów do osadzenia!")
+        print("No texts to embed!")
         return
 
     global chroma
-    chroma = EphemeralClient()    
+
+    if "SPACE_ID" in os.environ:
+        from chromadb import EphemeralClient
+        print("Production detected (Hugging Face). Launching Chroma IN-MEMORY...")
+        chroma = EphemeralClient()    
+    else:
+        from chromadb import PersistentClient
+        print("Local environment detected. Launching Chroma PERSISTENT (Disk)...")
+        chroma = PersistentClient(DB_NAME)  
     
     emb = openai.embeddings.create(model=embedding_model, input=texts).data    
     vectors = [e.embedding for e in emb]    
     
-    collection = chroma.get_or_create_collection(collection_name)    
+    if "SPACE_ID" in os.environ:
+        collection = chroma.get_or_create_collection(collection_name)
+    else:
+        if collection_name in [c.name for c in chroma.list_collections()]:
+            chroma.delete_collection(collection_name)
+        collection = chroma.get_or_create_collection(collection_name)   
+
     ids = [str(i) for i in range(len(chunks))]    
     metas = [chunk.metadata for chunk in chunks]    
-    collection.add(ids=ids, embeddings=vectors, documents=texts, metadatas=metas)    
+    collection.add(ids=ids, embeddings=vectors, documents=texts, metadatas=metas)   
+ 
     print(f"Vectorstore created IN MEMORY with {collection.count()} documents")
     
     return chroma
