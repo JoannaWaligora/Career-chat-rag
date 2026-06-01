@@ -6,6 +6,8 @@ Built using Retrieval-Augmented Generation (RAG) over GitHub repositories and po
 
 ## Live Demo
 
+The chatbot retrieves repository content, reranks relevant chunks, and generates grounded answers using GPT-4.1-mini.
+
 Try the application:
 
 👉 https://huggingface.co/spaces/JoannaW/AI_career_chatbot
@@ -26,18 +28,37 @@ The chatbot retrieves information from portfolio projects and generates grounded
 
 ---
 
+## Tech Stack
+
+- Python
+- OpenAI API
+- ChromaDB
+- Hugging Face Spaces
+- Gradio
+- GitHub API
+- RAG (Retrieval-Augmented Generation)
+- LLM Reranking
+- Synthetic Dataset Generation
+
+---
+
 ## Architecture
 
-Question 
-   ↓ 
-Retriever (Top 20) 
-   ↓ 
-Reranker 
-   ↓ 
-Top 8 Context 
-   ↓ 
-LLM 
-   ↓ 
+Question
+    │
+    ▼
+Retriever (Top 20)
+    │
+    ▼
+LLM Reranker
+    │
+    ▼
+Top 8 Context Chunks
+    │
+    ▼
+LLM
+    │
+    ▼
 Answer
 
 ---
@@ -104,7 +125,7 @@ The evaluation dataset (`tests.jsonl`) consists of non-trivial, grounded questio
 2. **Project-Level Reasoning:** Comprehensive questions built by analyzing combined chunk summaries across an entire repository.
 3. **Cross-Project Evaluation:** Complex queries starting with *"Across projects..."* that require retrieving and comparing implementation strategies, metrics, or technologies between at least two different repositories.
 
-Trivial or overly generic questions (e.g., *"What is the purpose of this repository?"*) were automatically filtered out during the pipeline cleanup phase to ensure high-quality benchmarking.
+Trivial and generic questions were automatically filtered out to create a more challenging evaluation benchmark.
 
 ---
 
@@ -123,21 +144,27 @@ Trivial or overly generic questions (e.g., *"What is the purpose of this reposit
 
 ## Repository Usage & Local Development
 
-This repository features an environment-aware hybrid architecture. It dynamically detects whether it is running in a local environment or deployed to the cloud, adjusting its database configuration automatically. 
+This repository features an environment-aware hybrid architecture. It dynamically detects whether it is running in a local environment or deployed to the cloud, adjusting its database configuration automatically.
 
 ### Reviewing the Code & Experiments Locally
-To explore the implementation, experiments, and RAG evaluation pipeline on your machine:
 
 1. **Clone the repository and install dependencies:**
-   ```bash
-   pip install -r requirements.txt```
+
+```bash
+pip install -r requirements.txt
+```
+
 2. **Run the chatbot interface locally:**
-   ```bash
-   python app.py```
+
+```bash
+python app.py
+```
+
 3. **Explore the Notebooks & Experiments:**
-   - Open `career_chat_1.ipynb` to review the baseline RAG exploration.
-   - Open `career_chat_2.ipynb` to see the optimization experiments and metrics calculation.
-   - Open `creator_test_data.ipynb` to analyze how the synthetic test dataset was generated.
+
+   * Open `career_chat_1.ipynb` to review the baseline RAG exploration.
+   * Open `career_chat_2.ipynb` to see the optimization experiments and metrics calculation.
+   * Open `creator_test_data.ipynb` to analyze how the synthetic test dataset was generated.
 ---
 
 ## Deployment & Production Notes (Hugging Face Spaces)
@@ -145,7 +172,7 @@ To explore the implementation, experiments, and RAG evaluation pipeline on your 
 The application code is fully production-optimized for cloud deployment. It utilizes conditional execution blocks to handle different environment states natively:
 
 - **Local Development:** The system utilizes Chroma's `PersistentClient` to save the vector database (`vector_db/`) to the local disk, preventing redundant OpenAI embedding API costs and allowing offline repository ingestion.
-- **Production (Hugging Face Spaces):** Due to strict stateless container architectures and read-only file system permissions (`readonly database error`), the application seamlessly switches to Chroma's `EphemeralClient()`. 
+- **Production (Hugging Face Spaces):** Due to Hugging Face Spaces' stateless runtime and file system limitations, the application seamlessly switches to Chroma's `EphemeralClient()`. 
 - **In-Memory Shared Runtime:** Upon container startup, `app.py` triggers the indexing pipeline (`ingest.py`), dynamically building the vector store in RAM. Using strategic local imports, the retrieval process (`retriever.py`) instantly shares this in-memory collection without disk access dependencies.
 
 ---
