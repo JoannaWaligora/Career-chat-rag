@@ -4,19 +4,22 @@ from litellm import completion
 from pydantic import BaseModel
 import json
 import os
+from pathlib import Path
 
-
-
+load_dotenv(override=True)
 MODEL = "gpt-4.1-mini"
 openai = OpenAI()
-DB_NAME = "vector_db_2"
 collection_name = "docs"
 embedding_model = "text-embedding-3-small"
-load_dotenv(override=True)
+
+ROOT = Path(__file__).resolve().parent
+DB_DIR = ROOT / "vector_db_2"
+DATA_DIR = ROOT / "data"
+
 RETRIEVAL_K = 20
 FINAL_K = 8
 
-with open("project_summaries.json", "r", encoding="utf-8") as f:
+with open(DATA_DIR / "project_summaries.json", "r", encoding="utf-8") as f:
     project_summaries_cache = json.load(f)
 
 def get_collection():
@@ -27,7 +30,7 @@ def get_collection():
         collection = chroma.get_collection(collection_name)
     else:
         from chromadb import PersistentClient
-        chroma = PersistentClient(DB_NAME)
+        chroma = PersistentClient(path=str(DB_DIR))
         collection = chroma.get_collection(collection_name)
         
     return collection

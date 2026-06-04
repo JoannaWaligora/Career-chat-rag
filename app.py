@@ -3,18 +3,42 @@ from openai import OpenAI
 import json
 import os
 import requests
+from chromadb import PersistentClient
 from pypdf import PdfReader
 import gradio as gr
 from retriever import answer_question
+from pathlib import Path
 
 load_dotenv(override=True)
 MODEL = "gpt-4.1-mini"
+ROOT = Path(__file__).resolve().parent
+DB_DIR = ROOT / "vector_db_2"
+DATA_DIR = ROOT / "data"
+
+from chromadb import PersistentClient
 
 def ensure_vector_db(force=False):
-    print("Building a vector database in RAM (In-Memory)...", flush=True)
+
+    if "SPACE_ID" in os.environ:
+        print("HF Space detected -> rebuilding in memory")
+        from ingest import main
+        main(build_summaries=False)
+        return
+
+    try:
+        chroma = PersistentClient(path=str(DB_DIR))
+        collection = chroma.get_collection("docs")
+
+        if collection.count() > 0 and not force:
+            print("Vector DB already exists.")
+            return
+
+    except Exception:
+        pass
+
+    print("Building Vector DB...")
     from ingest import main
     main(build_summaries=False)
-    print("Base building complete!", flush=True)
 
 def push(text):
     requests.post(
@@ -127,7 +151,7 @@ class Me:
     def __init__(self):
         self.openai = OpenAI()
         self.name = "Joanna Waligóra"
-        reader = PdfReader("linkedin.pdf")
+        reader = PdfReader(DATA_DIR / "linkedin.pdf")
         self.linkedin = ""
         for page in reader.pages:
             text = page.extract_text()

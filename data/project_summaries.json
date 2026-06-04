@@ -1,0 +1,111 @@
+{
+  "Career-chat-rag": {
+    "project_name": "Career-chat-rag",
+    "short_description": "An AI portfolio assistant leveraging Retrieval-Augmented Generation (RAG) to answer questions about AI/ML projects and professional experience by retrieving and summarizing information from GitHub repositories and LinkedIn data.",
+    "main_goal": "To build an interactive AI assistant that provides accurate, grounded, and concise answers about portfolio projects, technical skills, and career background using a RAG pipeline with document chunking, embeddings, vector search, LLM reranking, and evaluation.",
+    "tech_stack": [
+      "Python",
+      "OpenAI API",
+      "ChromaDB (PersistentClient and EphemeralClient)",
+      "LangChain (documents, text splitters)",
+      "Pydantic",
+      "Gradio",
+      "dotenv",
+      "requests",
+      "pypdf",
+      "litellm",
+      "GitHub API",
+      "GitPython"
+    ],
+    "models_used": [
+      "gpt-4.1-mini",
+      "text-embedding-3-small",
+      "text-embedding-3-large"
+    ]
+  },
+  "Car_brand_classification_CNN": {
+    "project_name": "Car_brand_classification_CNN",
+    "short_description": "This project classifies logos of eight car brands using convolutional neural networks, including transfer learning with VGG16, with data cleaning, augmentation, and model evaluation.",
+    "main_goal": "To accurately classify images of car brand logos from eight different brands using CNN models and transfer learning techniques.",
+    "tech_stack": [
+      "Python",
+      "TensorFlow Keras",
+      "scikit-learn",
+      "Seaborn",
+      "Matplotlib",
+      "Pandas",
+      "NumPy",
+      "Kaggle dataset"
+    ],
+    "models_used": [
+      "Basic CNN with Conv2D, MaxPooling, Dropout, Dense layers",
+      "CNN with Data Augmentation",
+      "Transfer Learning with VGG16 base and custom dense layers",
+      "Transfer Learning with VGG16 base using preprocess_input function"
+    ]
+  },
+  "Cracow_Real_Estate_Price_Prediction_2025": {
+    "project_name": "Cracow_Real_Estate_Price_Prediction_2025",
+    "short_description": "A comprehensive project to predict apartment prices in Krakow using scraped data from gratka.pl in May 2025, involving data scraping, extensive feature engineering, and evaluation of multiple regression models.",
+    "main_goal": "To develop the best predictive model for apartment prices in Krakow by leveraging real estate listing data, performing detailed data cleaning and feature engineering, and comparing various machine learning models to identify the most accurate one.",
+    "tech_stack": [
+      "Python",
+      "pandas",
+      "numpy",
+      "scikit-learn",
+      "BeautifulSoup",
+      "requests",
+      "matplotlib"
+    ],
+    "models_used": [
+      "LinearRegression",
+      "LogisticRegression",
+      "ElasticNet",
+      "DecisionTreeRegressor",
+      "RandomForestRegressor"
+    ]
+  },
+  "LIDAR_point_cloud_classification_ANN": {
+    "project_name": "LIDAR_point_cloud_classification_ANN",
+    "short_description": "Classification of airborne laser scanning (ALS) LIDAR point cloud data from Krakow into multiple categories including ground, vegetation of various heights, buildings, noise, and water areas using machine learning and neural network models.",
+    "main_goal": "To accurately classify LIDAR point cloud data into predefined classes representing different surface types and objects, leveraging various machine learning models and an artificial neural network to achieve the best classification performance.",
+    "tech_stack": [
+      "Python",
+      "NumPy",
+      "Pandas",
+      "scikit-learn",
+      "TensorFlow Keras",
+      "Matplotlib",
+      "Seaborn"
+    ],
+    "models_used": [
+      "Logistic Regression",
+      "Decision Tree Classifier",
+      "Gaussian Naive Bayes",
+      "Random Forest Classifier",
+      "Artificial Neural Network (ANN)"
+    ]
+  },
+  "NLP-Classification_of_tweets_about_airlines_LSTM": {
+    "project_name": "NLP-Classification_of_tweets_about_airlines_LSTM",
+    "short_description": "This project performs sentiment classification of airline-related tweets using text preprocessing, machine learning models, and deep learning LSTM models with custom embeddings and Word2Vec embeddings.",
+    "main_goal": "To build and compare models that classify the sentiment of tweets about airlines into positive or negative categories, excluding neutral tweets.",
+    "tech_stack": [
+      "Python",
+      "NumPy",
+      "Pandas",
+      "NLTK",
+      "scikit-learn",
+      "Gensim",
+      "TensorFlow Keras",
+      "Matplotlib",
+      "Seaborn"
+    ],
+    "models_used": [
+      "Logistic Regression",
+      "Decision Tree Classifier",
+      "LSTM with custom embedding matrix",
+      "LSTM with Word2Vec embeddings"
+    ]
+  }
+}

@@ -1,0 +1,8 @@
+vector_db/
+vector_db_2/
+repos/
+data/linkedin.pdf
+.env
+__pycache__/
+.ipynb_checkpoints/
+venv/

@@ -3,17 +3,21 @@ from dotenv import load_dotenv
 from litellm import completion
 from pydantic import BaseModel
 import json
-import re
 import os
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from pathlib import Path
 
+load_dotenv(override=True)
 MODEL = "gpt-4.1-mini"
-DB_NAME = "vector_db_2"
 openai = OpenAI()
 collection_name = "docs"
 embedding_model = "text-embedding-3-small"
-load_dotenv(override=True)
+
+ROOT = Path(__file__).resolve().parent
+REPOS_DIR = ROOT / "repos"
+DB_DIR = ROOT / "vector_db_2"
+DATA_DIR = ROOT / "data"
 
 def load_ipynb(file_path):
     texts = []
@@ -29,16 +33,13 @@ def load_ipynb(file_path):
 
     return "\n".join(texts)
 
-def extract_project_name(path: str) -> str:
-    if not path:
-        return "UNKNOWN_PROJECT"
+def extract_project_name(path: Path) -> str:
+    parts = path.parts
 
-    path = path.replace("\\", "/")
-
-    match = re.search(r"repos/([^/]+)/", path)
-
-    if match:
-        return match.group(1)
+    if "repos" in parts:
+        idx = parts.index("repos")
+        if idx + 1 < len(parts):
+            return parts[idx + 1]
 
     return "UNKNOWN_PROJECT"
 
@@ -46,41 +47,37 @@ def extract_project_name(path: str) -> str:
 def load_files():
     documents = []
 
-    repo_path = "repos"
+    for file_path in REPOS_DIR.rglob("*"):
 
-    for root, _, files in os.walk(repo_path):
-        if ".git" in root:
+        if ".git" in file_path.parts:
             continue
 
-        print("Checking:", root)
+        if file_path.suffix not in [".md", ".ipynb"]:
+            continue
 
-        for file in files:
-            print("Found:", file)
+        print("Loading:", file_path)
 
-            if file.endswith((".md", ".ipynb")):
-                file_path = os.path.join(root, file)
+        try:
+            if file_path.suffix == ".ipynb":
+                content = load_ipynb(file_path)
+            else:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    content = f.read()
 
-                try:
-                    if file.endswith(".ipynb"):
-                        content = load_ipynb(file_path)
-                    else:
-                        with open(file_path, "r", encoding="utf-8") as f:
-                            content = f.read()
+            project_name = extract_project_name(file_path)
 
-                    project_name = extract_project_name(file_path)
+            documents.append(
+                Document(
+                    page_content=content,
+                    metadata={
+                        "source": str(file_path),
+                        "project": project_name
+                    }
+                )
+            )
 
-                    documents.append(
-                        Document(
-                            page_content=content,
-                            metadata={
-                                "source": file_path,
-                                "project": project_name
-                            }
-                        )
-                    )
-
-                except Exception as e:
-                    print("ERROR:", file_path, e)
+        except Exception as e:
+            print("ERROR:", file_path, e)
 
     print(f"Loaded {len(documents)} documents")
     return documents
@@ -182,7 +179,7 @@ def create_embeddings(chunks):
     else:
         from chromadb import PersistentClient
         print("Local environment detected. Launching Chroma PERSISTENT (Disk)...")
-        chroma = PersistentClient(DB_NAME)  
+        chroma = PersistentClient(path=str(DB_DIR))  
     
     emb = openai.embeddings.create(model=embedding_model, input=texts).data    
     vectors = [e.embedding for e in emb]    
@@ -288,7 +285,7 @@ def main(build_summaries=True):
     if build_summaries:
         project_summaries_cache = build_project_summaries_cache(chunks_result)
 
-        with open("project_summaries.json", "w", encoding="utf-8") as f:
+        with open(DATA_DIR / "project_summaries.json", "w", encoding="utf-8") as f:
             json.dump(project_summaries_cache, f, ensure_ascii=False, indent=2)
 
         print("Project summaries saved")
